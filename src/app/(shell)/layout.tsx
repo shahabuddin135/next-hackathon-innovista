@@ -1,4 +1,5 @@
 import { Header } from "@/components/Header"
+import { I18nProvider } from "@/lib/i18n"
 
 export default function ShellLayout({
   children,
@@ -11,10 +12,12 @@ export default function ShellLayout({
       <div className="fixed inset-0 opacity-25 dark:opacity-15 pointer-events-none grain-texture" />
       
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1 flex flex-col">
-          {children}
-        </main>
+        <I18nProvider>
+          <Header />
+          <main className="flex-1 flex flex-col">
+            {children}
+          </main>
+        </I18nProvider>
       </div>
     </div>
   )

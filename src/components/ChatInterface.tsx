@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ChatMessages } from "@/components/ChatMessages"
 import { ChatComposer } from "@/components/ChatComposer"
 import { ContextPanel } from "@/components/ContextPanel"
 import { FeatureTabs } from "@/components/FeatureTabs"
 import { type UserRole } from "@/components/Header"
+import { eventBus } from "@/lib/events/eventBus"
 
 export interface Message {
   id: string
@@ -24,6 +25,17 @@ export function ChatInterface() {
       timestamp: new Date(Date.now() - 120000) // 2 minutes ago
     }
   ])
+
+  useEffect(() => {
+    // Listen for header role changes (message pattern: "role:teach" | "role:learn")
+    const unsubscribe = eventBus.subscribe((evt) => {
+      if (evt.scope === "role" && typeof evt.message === "string" && evt.message.startsWith("role:")) {
+        const role = evt.message.split(":")[1] as UserRole
+        if (role === "teach" || role === "learn") setCurrentRole(role)
+      }
+    })
+    return unsubscribe
+  }, [])
 
   const handleSendMessage = (content: string) => {
     const newMessage: Message = {

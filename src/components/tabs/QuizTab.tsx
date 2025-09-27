@@ -7,14 +7,16 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { Brain, Play, CheckCircle, XCircle } from "lucide-react"
+import { Brain, Play, CheckCircle } from "lucide-react"
 import { type UserRole } from "@/components/Header"
+import { useI18n } from "@/lib/i18n"
 
 interface QuizTabProps {
   currentRole: UserRole
 }
 
 export function QuizTab({ currentRole }: QuizTabProps) {
+  const { t } = useI18n()
   const [topic, setTopic] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [currentQuestion, setCurrentQuestion] = useState(0)
@@ -68,31 +70,31 @@ export function QuizTab({ currentRole }: QuizTabProps) {
         <div className="space-y-2">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Brain className="h-5 w-5" />
-            Quiz Creator
+            {t("quiz_creator")}
           </h3>
           <p className="text-sm text-muted-foreground">
-            Generate interactive quizzes to test your students' understanding.
+            {t("quiz_creator_desc")}
           </p>
         </div>
 
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-base">Create New Quiz</CardTitle>
+            <CardTitle className="text-base">{t("create_new_quiz")}</CardTitle>
             <CardDescription>
-              Specify a topic and we'll generate relevant questions
+              {t("create_new_quiz_desc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <form onSubmit={handleGenerate} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="quiz-topic" className="text-sm font-medium">
-                  Quiz topic
+                  {t("quiz_topic")}
                 </label>
                 <Input
                   id="quiz-topic"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  placeholder="e.g., algebra basics, world history, biology..."
+                  placeholder={t("quiz_topic_ph")}
                   disabled={isGenerating}
                 />
               </div>
@@ -105,12 +107,12 @@ export function QuizTab({ currentRole }: QuizTabProps) {
                 {isGenerating ? (
                   <>
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent mr-2" />
-                    Generating quiz...
+                    {t("generating_quiz")}
                   </>
                 ) : (
                   <>
                     <Brain className="h-4 w-4 mr-2" />
-                    Generate Quiz
+                    {t("generate_quiz_btn")}
                   </>
                 )}
               </Button>
@@ -119,7 +121,7 @@ export function QuizTab({ currentRole }: QuizTabProps) {
             {isGenerating && (
               <div className="space-y-3">
                 <div className="text-sm text-muted-foreground text-center">
-                  Creating questions for "{topic}"...
+                  {t("generating_for")} "{topic}"...
                 </div>
                 <div className="space-y-2">
                   {[1, 2, 3].map((i) => (
@@ -138,11 +140,10 @@ export function QuizTab({ currentRole }: QuizTabProps) {
             {!isGenerating && topic && (
               <div className="space-y-3">
                 <Badge variant="outline" className="w-fit">
-                  UI Demo - No actual quiz generation
+                  {t("ui_demo_note")}
                 </Badge>
                 <div className="text-sm text-muted-foreground">
-                  In the full version, this will generate custom quiz questions 
-                  based on your specified topic using AI.
+                  {t("ui_demo_desc")}
                 </div>
               </div>
             )}
@@ -153,9 +154,9 @@ export function QuizTab({ currentRole }: QuizTabProps) {
                   <Brain className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <div className="space-y-1">
-                  <p className="font-medium">Ready to create</p>
+                  <p className="font-medium">{t("ready_to_create")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Enter a topic to generate quiz questions
+                    {t("enter_topic_to_generate")}
                   </p>
                 </div>
               </div>
@@ -172,18 +173,18 @@ export function QuizTab({ currentRole }: QuizTabProps) {
       <div className="space-y-2">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Brain className="h-5 w-5" />
-          Practice Quiz
+          {t("practice_quiz")}
         </h3>
         <p className="text-sm text-muted-foreground">
-          Test your knowledge with interactive quizzes.
+          {t("practice_quiz_desc")}
         </p>
       </div>
 
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="text-base">Sample Quiz: {sampleQuiz.title}</CardTitle>
+          <CardTitle className="text-base">{t("sample_quiz")}: {sampleQuiz.title}</CardTitle>
           <CardDescription>
-            Try this sample quiz to see how the feature works
+            {t("try_sample_quiz")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -191,10 +192,10 @@ export function QuizTab({ currentRole }: QuizTabProps) {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Badge variant="outline">
-                  Question {currentQuestion + 1} of {sampleQuiz.questions.length}
+                  {t("question")} {currentQuestion + 1} {t("of") ?? "of"} {sampleQuiz.questions.length}
                 </Badge>
                 <Badge variant="secondary">
-                  Progress: {Math.round(((currentQuestion + 1) / sampleQuiz.questions.length) * 100)}%
+                  {t("progress")}: {Math.round(((currentQuestion + 1) / sampleQuiz.questions.length) * 100)}%
                 </Badge>
               </div>
 
@@ -219,7 +220,7 @@ export function QuizTab({ currentRole }: QuizTabProps) {
                   disabled={!selectedAnswer}
                   className="w-full"
                 >
-                  {currentQuestion < sampleQuiz.questions.length - 1 ? "Next Question" : "Finish Quiz"}
+                  {currentQuestion < sampleQuiz.questions.length - 1 ? t("next_question") : t("finish_quiz")}
                 </Button>
               </div>
             </div>
@@ -229,14 +230,13 @@ export function QuizTab({ currentRole }: QuizTabProps) {
                 <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
               <div className="space-y-2">
-                <h4 className="text-lg font-semibold">Quiz Complete!</h4>
+                <h4 className="text-lg font-semibold">{t("quiz_complete")}</h4>
                 <p className="text-muted-foreground">
-                  Great job finishing the sample quiz. In the full version, 
-                  you'd see your detailed results here.
+                  {t("quiz_complete_desc")}
                 </p>
               </div>
               <Button onClick={handleStartQuiz} variant="outline">
-                Retake Quiz
+                {t("retake_quiz")}
               </Button>
             </div>
           ) : (
@@ -245,14 +245,14 @@ export function QuizTab({ currentRole }: QuizTabProps) {
                 <Play className="h-6 w-6 text-muted-foreground" />
               </div>
               <div className="space-y-2">
-                <h4 className="text-lg font-semibold">Ready to start?</h4>
+                <h4 className="text-lg font-semibold">{t("ready_to_start")}</h4>
                 <p className="text-muted-foreground">
-                  This sample quiz will demonstrate the quiz-taking experience.
+                  {t("sample_quiz_intro")}
                 </p>
               </div>
               <Button onClick={handleStartQuiz}>
                 <Play className="h-4 w-4 mr-2" />
-                Start Sample Quiz
+                {t("start_sample_quiz")}
               </Button>
             </div>
           )}

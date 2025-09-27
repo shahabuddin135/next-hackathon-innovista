@@ -19,12 +19,14 @@ import {
   Plus,
   X
 } from "lucide-react"
+import { useI18n } from "@/lib/i18n"
 
 interface FeatureTabsProps {
   currentRole: UserRole
 }
 
 export function FeatureTabs({ currentRole }: FeatureTabsProps) {
+  const { t } = useI18n()
   const [activeTab, setActiveTab] = useState<string | null>(null)
   const [roadmapDialogOpen, setRoadmapDialogOpen] = useState(false)
   const [quizDialogOpen, setQuizDialogOpen] = useState(false)
@@ -50,7 +52,7 @@ export function FeatureTabs({ currentRole }: FeatureTabsProps) {
               className="h-8 gap-2"
             >
               <Search className="h-3 w-3" />
-              Online Search
+              {t("online_search")}
             </Button>
             
             <Button
@@ -60,7 +62,7 @@ export function FeatureTabs({ currentRole }: FeatureTabsProps) {
               className="h-8 gap-2"
             >
               <Eye className="h-3 w-3" />
-              Visualize
+              {t("visualize")}
             </Button>
             
             <Button
@@ -70,7 +72,7 @@ export function FeatureTabs({ currentRole }: FeatureTabsProps) {
               className="h-8 gap-2"
             >
               <Brain className="h-3 w-3" />
-              {currentRole === "teach" ? "Make Quiz" : "Take Quiz"}
+              {currentRole === "teach" ? t("make_quiz") : t("take_quiz")}
             </Button>
 
             {/* Teacher-only features */}
@@ -83,14 +85,14 @@ export function FeatureTabs({ currentRole }: FeatureTabsProps) {
                   className="h-8 gap-2"
                 >
                   <Map className="h-3 w-3" />
-                  Make Roadmap
+                  {t("make_roadmap")}
                 </Button>
               </>
             )}
 
             <div className="hidden sm:flex items-center gap-2 ml-auto">
               <Badge variant="secondary" className="text-xs">
-                Click to activate features
+                {t("activate_features_hint")}
               </Badge>
             </div>
           </div>
@@ -120,21 +122,21 @@ export function FeatureTabs({ currentRole }: FeatureTabsProps) {
                 className="h-8 px-3 data-[state=active]:bg-background"
               >
                 <Search className="h-3 w-3 mr-1" />
-                Online Tool
+                {t("online_search")}
               </TabsTrigger>
               <TabsTrigger 
                 value="visualize" 
                 className="h-8 px-3 data-[state=active]:bg-background"
               >
                 <Eye className="h-3 w-3 mr-1" />
-                Visualize
+                {t("visualize")}
               </TabsTrigger>
               <TabsTrigger 
                 value="quiz" 
                 className="h-8 px-3 data-[state=active]:bg-background"
               >
                 <Brain className="h-3 w-3 mr-1" />
-                {currentRole === "teach" ? "Make Quiz" : "Take Quiz"}
+                {currentRole === "teach" ? t("make_quiz") : t("take_quiz")}
               </TabsTrigger>
             </TabsList>
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -18,6 +18,7 @@ import {
 import { useNetworkInfo } from "@/lib/hooks/useNetworkInfo"
 import EventLogButtonWithPanel from "@/components/EventLogPanel"
 import { eventBus } from "@/lib/events/eventBus"
+import { useI18n } from "@/lib/i18n"
 
 export type UserRole = "teach" | "learn"
 export type ConnectionMode = "online" | "offline" | "auto"
@@ -28,6 +29,7 @@ interface HeaderProps {
 }
 
 export function Header({ onRoleChange, onModeChange }: HeaderProps) {
+  const { t, lang, setLang } = useI18n()
   const pathname = usePathname()
   const [currentRole, setCurrentRole] = useState<UserRole>("learn")
   const [currentMode, setCurrentMode] = useState<ConnectionMode>("auto")
@@ -47,6 +49,8 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
   const handleRoleChange = (role: UserRole) => {
     setCurrentRole(role)
     onRoleChange?.(role)
+    // Broadcast so ChatInterface can sync
+    eventBus.emit({ scope: "role", level: "info", message: `role:${role}` })
   }
 
   const handleModeChange = (mode: ConnectionMode) => {
@@ -64,6 +68,17 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
         return <RotateCcw className="w-4 h-4" />
     }
   }
+
+  const modelName = useMemo(() => {
+    if (currentMode === "offline") return "LM Studio (local)"
+    if (currentMode === "online") {
+      return quality === "good" ? "Gemini 2.5 Pro" : "Gemini 2.0 Flash"
+    }
+    // auto: adapt by quality, fall back to local on poor/unknown
+    if (quality === "good") return "Gemini 2.5 Pro"
+    if (quality === "ok") return "Gemini 2.0 Flash"
+    return "LM Studio (local)"
+  }, [currentMode, quality])
 
   const qualityBadge = (
     <Badge
@@ -107,7 +122,7 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
                 pathname === "/chat" ? "text-foreground" : "text-foreground/60"
               )}
             >
-              Chat
+              {t("chat")}
             </Link>
             <Link
               href="/settings"
@@ -116,7 +131,7 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
                 pathname === "/settings" ? "text-foreground" : "text-foreground/60"
               )}
             >
-              Settings
+              {t("settings")}
             </Link>
             <Link
               href="/about"
@@ -125,7 +140,7 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
                 pathname === "/about" ? "text-foreground" : "text-foreground/60"
               )}
             >
-              About
+              {t("about")}
             </Link>
           </nav>
         </div>
@@ -141,7 +156,7 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           {/* Role Toggle */}
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-muted-foreground hidden sm:inline">Role:</span>
+            <span className="text-sm text-muted-foreground hidden sm:inline">{t("role")}:</span>
             <div 
               className="inline-flex items-center rounded-md bg-muted p-1"
               role="radiogroup"
@@ -157,7 +172,7 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
                 aria-label="Switch to Teacher mode"
               >
                 <GraduationCap className="w-3 h-3 mr-1" />
-                Teach
+                {t("teach")}
               </Button>
               <Button
                 variant={currentRole === "learn" ? "default" : "ghost"}
@@ -169,14 +184,36 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
                 aria-label="Switch to Learner mode"
               >
                 <BookOpen className="w-3 h-3 mr-1" />
-                Learn
+                {t("learn")}
               </Button>
             </div>
           </div>
 
-          {/* Mode Indicator + Network */}
+          {/* Language Toggle */}
+          <div className="hidden sm:flex items-center space-x-1">
+            <Button
+              variant={lang === "en" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={() => setLang("en")}
+              aria-pressed={lang === "en"}
+            >
+              EN
+            </Button>
+            <Button
+              variant={lang === "ur" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={() => setLang("ur")}
+              aria-pressed={lang === "ur"}
+            >
+              اُردو
+            </Button>
+          </div>
+
+          {/* Mode Indicator + Network + Model */}
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-muted-foreground hidden sm:inline">Mode:</span>
+            <span className="text-sm text-muted-foreground hidden sm:inline">{t("mode")}:</span>
             <Button
               variant="outline"
               size="sm"
@@ -202,6 +239,10 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
                 {rttMs != null ? `${rttMs} ms` : "? ms"}
               </span>
             </div>
+            {/* Current Model */}
+            <Badge variant="secondary" className="hidden sm:inline-flex h-7 items-center">
+              {t("model")}: {modelName}
+            </Badge>
             {/* Event Log Panel trigger */}
             <EventLogButtonWithPanel />
           </div>

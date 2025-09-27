@@ -52,7 +52,7 @@ export function FeatureTabs({ currentRole }: FeatureTabsProps) {
               className="h-8 gap-2"
             >
               <Search className="h-3 w-3" />
-              {t("online_search")}
+              {t("websearch")}
             </Button>
             
             <Button
@@ -122,7 +122,7 @@ export function FeatureTabs({ currentRole }: FeatureTabsProps) {
                 className="h-8 px-3 data-[state=active]:bg-background"
               >
                 <Search className="h-3 w-3 mr-1" />
-                {t("online_search")}
+                {t("websearch")}
               </TabsTrigger>
               <TabsTrigger 
                 value="visualize" 

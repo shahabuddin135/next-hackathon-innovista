@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -15,6 +15,9 @@ import {
   WifiOff,
   RotateCcw
 } from "lucide-react"
+import { useNetworkInfo } from "@/lib/hooks/useNetworkInfo"
+import EventLogButtonWithPanel from "@/components/EventLogPanel"
+import { eventBus } from "@/lib/events/eventBus"
 
 export type UserRole = "teach" | "learn"
 export type ConnectionMode = "online" | "offline" | "auto"
@@ -28,6 +31,18 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
   const pathname = usePathname()
   const [currentRole, setCurrentRole] = useState<UserRole>("learn")
   const [currentMode, setCurrentMode] = useState<ConnectionMode>("auto")
+  const { downlinkMbps, rttMs, effectiveType, quality, lastUpdated } = useNetworkInfo(15000)
+
+  useEffect(() => {
+    if (lastUpdated) {
+      eventBus.emit({
+        scope: "network",
+        level: "debug",
+        message: `Network update: ${downlinkMbps ?? "?"} Mbps, ${rttMs ?? "?"} ms RTT (${effectiveType ?? "n/a"})`,
+        data: { downlinkMbps, rttMs, effectiveType, quality, lastUpdated }
+      })
+    }
+  }, [downlinkMbps, rttMs, effectiveType, quality, lastUpdated])
 
   const handleRoleChange = (role: UserRole) => {
     setCurrentRole(role)
@@ -49,6 +64,22 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
         return <RotateCcw className="w-4 h-4" />
     }
   }
+
+  const qualityBadge = (
+    <Badge
+      variant="outline"
+      className={cn(
+        "h-6 px-2 text-xs capitalize",
+        quality === "good" && "border-emerald-500 text-emerald-700 dark:text-emerald-300",
+        quality === "ok" && "border-amber-500 text-amber-700 dark:text-amber-300",
+        quality === "poor" && "border-red-500 text-red-700 dark:text-red-300",
+        quality === "unknown" && "text-muted-foreground"
+      )}
+      aria-label={`Network quality ${quality}`}
+    >
+      {quality}
+    </Badge>
+  )
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -143,7 +174,7 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
             </div>
           </div>
 
-          {/* Mode Indicator */}
+          {/* Mode Indicator + Network */}
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground hidden sm:inline">Mode:</span>
             <Button
@@ -161,6 +192,18 @@ export function Header({ onRoleChange, onModeChange }: HeaderProps) {
               {getModeIcon()}
               <span className="ml-1 capitalize">{currentMode}</span>
             </Button>
+            {/* Network speed indicator */}
+            <div className="hidden sm:flex items-center gap-2 ml-2" aria-live="polite" aria-label="Network status">
+              {qualityBadge}
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {downlinkMbps != null ? `${downlinkMbps.toFixed(1)} Mbps` : "? Mbps"}
+              </span>
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {rttMs != null ? `${rttMs} ms` : "? ms"}
+              </span>
+            </div>
+            {/* Event Log Panel trigger */}
+            <EventLogButtonWithPanel />
           </div>
 
           {/* Mobile menu icons */}
